@@ -1,0 +1,23 @@
+{
+  "name": "beer-game",
+  "version": "1.0.0",
+  "private": true,
+  "description": "啤酒游戏：牛鞭效应云端模拟（经典啤酒游戏非官方教学复刻）",
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "build": "npm run build --workspace @beer-game/shared && npm run build -w apps/server && npm run build -w apps/web",
+    "dev": "npm run dev -w apps/server",
+    "dev:web": "npm run dev -w apps/web",
+    "test": "npm run test -w apps/server",
+    "typecheck": "npm run build --workspace @beer-game/shared && npm run typecheck -w apps/server && npm run typecheck -w apps/web"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "devDependencies": {
+    "typescript": "^5.5.4"
+  }
+}

@@ -1,0 +1,110 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  RETAILER
+  WHOLESALER
+  DISTRIBUTOR
+  FACTORY
+}
+
+enum GameStatus {
+  idle
+  playing
+  paused
+  ended
+}
+
+model Room {
+  id            String         @id @default(uuid())
+  code          String         @unique
+  name          String
+  status        GameStatus     @default(idle)
+  currentWeek   Int            @default(0)
+  totalWeeks    Int            @default(36)
+  scenarioId    String         @default("classic")
+  teacherToken  String
+  teacherName   String
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  players       Player[]
+  settings      RoomSettings?
+  snapshots     WeeklySnapshot[]
+  result        Result?
+}
+
+model Player {
+  id           String       @id @default(uuid())
+  roomId       String
+  role         Role
+  name         String
+  sessionToken String       @unique
+  isAI         Boolean      @default(false)
+  aiStrategy   String?
+  connected    Boolean      @default(false)
+  joinedAt     DateTime     @default(now())
+  room         Room         @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  snapshots    PlayerSnapshot[]
+
+  @@unique([roomId, role])
+}
+
+model RoomSettings {
+  id                    String  @id @default(uuid())
+  roomId                String  @unique
+  initialInventory      Int     @default(12)
+  orderProcessingDelay  Int     @default(1)
+  shippingDelay         Int     @default(2)
+  productionDelay       Int     @default(2)
+  inventoryHoldCost     Float   @default(0.5)
+  backlogCost           Float   @default(1.0)
+  room                  Room    @relation(fields: [roomId], references: [id], onDelete: Cascade)
+}
+
+/// 全局每周快照（复盘用，服务端权威汇总）
+model WeeklySnapshot {
+  id     String @id @default(uuid())
+  roomId String
+  week   Int
+  demand Int
+  room   Room  @relation(fields: [roomId], references: [id], onDelete: Cascade)
+
+  @@unique([roomId, week])
+}
+
+/// 每个玩家/角色每周快照
+model PlayerSnapshot {
+  id            String @id @default(uuid())
+  roomId        String
+  playerId      String
+  week          Int
+  role          Role
+  orderReceived Int    @default(0)
+  orderPlaced   Int    @default(0)
+  inventory     Int
+  backlog       Int
+  shipped       Int
+  inventoryCost Float  @default(0)
+  backlogCost   Float  @default(0)
+  weekCost      Float  @default(0)
+  cumulativeCost Float @default(0)
+  player        Player @relation(fields: [playerId], references: [id], onDelete: Cascade)
+
+  @@unique([playerId, week])
+}
+
+model Result {
+  id                 String  @id @default(uuid())
+  roomId             String  @unique
+  varianceMultiplier Float   @default(1)
+  totalCosts         Json
+  report             Json
+  createdAt          DateTime @default(now())
+  room               Room    @relation(fields: [roomId], references: [id], onDelete: Cascade)
+}

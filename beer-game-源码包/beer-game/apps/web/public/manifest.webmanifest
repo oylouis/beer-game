@@ -1,0 +1,16 @@
+{
+  "id": "/",
+  "name": "啤酒游戏：牛鞭效应云端模拟",
+  "short_name": "啤酒游戏",
+  "description": "基于经典啤酒游戏教学机制的非官方复刻，体验牛鞭效应。",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#0ea5e9",
+  "orientation": "any",
+  "icons": [
+    { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}
